@@ -4,9 +4,9 @@ import { Navbar, NavbarBrand, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Navb
 
 export default function NavBar() {
     const menuItems = [
-        { name: "Convert / Process", href: "#" },
-        { name: "Data", href: "#" },
-        { name: "Map", href: "#" }
+        { name: "Convert / Process", href: "/" },
+        { name: "Data", href: "/data" },
+        { name: "Map", href: "/map" }
     ];
 
     // State to track the active item
@@ -48,10 +48,10 @@ export default function NavBar() {
 
             <NavbarContent justify="end">
                 <NavbarItem className="hidden lg:flex">
-                    <Link href="/login">Login</Link>
+                    <Link color="secondary" href="/login">Login</Link>
                 </NavbarItem>
                 <NavbarItem>
-                    <Button as={Link} color="primary" href="#" variant="flat">
+                    <Button as={Link} color="default" href="/signup" variant="flat">
                         Sign Up
                     </Button>
                 </NavbarItem>
