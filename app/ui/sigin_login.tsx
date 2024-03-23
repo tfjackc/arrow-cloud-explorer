@@ -25,7 +25,7 @@ export default function UserInformation() {
     return (
         <main>
             <div className="flex flex-col items-center justify-center h-screen px-4 m-2">
-                <Card className="w-full max-w-md">
+                <Card className="sm:w-[800px] w-full">
                     <CardHeader className="flex gap-3 my-2">
                         <Image
                             height={40}

@@ -1,6 +1,4 @@
 import Uploadfile from "@/app/ui/uploadfile";
-import {Card, CardHeader, CardBody, CardFooter, Divider, Link, Image} from "@nextui-org/react";
-
 export default function Home() {
 
     return (
