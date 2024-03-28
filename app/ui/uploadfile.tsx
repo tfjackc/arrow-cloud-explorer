@@ -1,10 +1,31 @@
+'use client';
 import {Button, Card, CardBody, CardFooter, CardHeader, Divider, Image, Input} from "@nextui-org/react";
 export default function Uploadfile() {
 
     async function create(formData: FormData) {
-        'use server';
+        console.log("getting file")
         const file = formData.get('upload_file') as File;
-        console.log('file', file);
+        console.log(file)
+    }
+
+    async function getData() {
+        try {
+            const res = await fetch('https://wy7txjytya2yvpgwamo33f7usi0sstki.lambda-url.us-west-2.on.aws/', {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+             }
+            });
+            if (!res.ok) {
+                // This will activate the closest `error.js` Error Boundary
+                throw new Error('Failed to fetch data')
+            }
+            const data = await res.json();
+            console.log(data);
+
+            } catch (error) {
+                console.error(error);
+            }
     }
 
     return (
@@ -27,6 +48,7 @@ export default function Uploadfile() {
                             </p>
                             <Button color="primary" type="submit">Submit</Button>
                         </form>
+                        <Button className="w-1/3 mt-5 text-amber-50" color="success" type="submit" onClick={getData}>GetData</Button>
                     </CardBody>
                     <Divider/>
                     <CardFooter>
