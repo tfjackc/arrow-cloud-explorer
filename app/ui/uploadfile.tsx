@@ -1,31 +1,33 @@
 'use client';
 import {Button, Card, CardBody, CardFooter, CardHeader, Divider, Image, Input} from "@nextui-org/react";
+import React, { useState } from "react";
+import { tableFromIPC } from 'apache-arrow';
 export default function Uploadfile() {
 
-    async function create(formData: FormData) {
-        console.log("getting file")
-        const file = formData.get('upload_file') as File;
-        console.log(file)
+    const [s3url, setS3url] = useState("http://127.0.0.1:8000/s3_item");
+
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (s3url) {
+            console.log("calling getData")
+            await getData(s3url);
+        }
     }
 
-    async function getData() {
+    async function getData(s3url: string) {
         try {
-            const res = await fetch('https://wy7txjytya2yvpgwamo33f7usi0sstki.lambda-url.us-west-2.on.aws/', {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-             }
-            });
+            console.log("Fetching data");
+            const res = await fetch(s3url);
             if (!res.ok) {
-                // This will activate the closest `error.js` Error Boundary
-                throw new Error('Failed to fetch data')
+                throw new Error(`HTTP error! status: ${res.status}`);
             }
-            const data = await res.json();
-            console.log(data);
-
-            } catch (error) {
-                console.error(error);
-            }
+            const arrayBuffer = await res.arrayBuffer();
+            const table = tableFromIPC(arrayBuffer); // Assumes tableFromIPC can handle ArrayBuffer directly
+            console.table([...table]);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     return (
@@ -39,16 +41,17 @@ export default function Uploadfile() {
                     </CardHeader>
                     <Divider/>
                     <CardBody className="overflow-y-clip my-5">
-                        <form action={create}>
+                        <form onSubmit={handleSubmit}>
                             <p className="mb-6">
-                                <input type="file"
-                                       name='upload_file'
-                                       required
+                                <input type="input"
+                                       name="s3url"
+                                       value={s3url}
+                                       onChange={e => setS3url(e.target.value)}
                                 />
                             </p>
-                            <Button color="primary" type="submit">Submit</Button>
+                            <Button className="w-1/3 mt-5 text-amber-50 hover:bg-sky-600" color="success" type="submit">GetData</Button>
                         </form>
-                        <Button className="w-1/3 mt-5 text-amber-50" color="success" type="submit" onClick={getData}>GetData</Button>
+
                     </CardBody>
                     <Divider/>
                     <CardFooter>
