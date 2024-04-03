@@ -1,13 +1,22 @@
 'use client';
 import {Button, Card, CardBody, CardFooter, CardHeader, Divider, Image, Input, } from "@nextui-org/react";
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue} from "@nextui-org/react";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { tableFromIPC } from 'apache-arrow';
+//http://127.0.0.1:8000/s3_item?bucket=gva-data-bucket&folder=month-parquet%2FMONTH%3D2020-12&name=d4723648cfdb4e65b0537890d6e0396e-0.parquet
 export default function Uploadfile() {
 
-    const [s3url, setS3url] = useState("http://127.0.0.1:8000/s3_item");
-    const [table, setTable] = useState(tableFromIPC([])); // Adjusted line
+    const [bucket, setBucket] = useState("gva-data-bucket");
+    const [folder, setFolder] = useState("month-parquet%2FMONTH%3D2020-12");
+    const [item_name, setItem_name] = useState("d4723648cfdb4e65b0537890d6e0396e-0.parquet");
+    const [s3url, setS3url] = useState(`http://127.0.0.1:8000/s3_item?bucket=${bucket}&folder=${folder}&name=${item_name}`);
+    const [fetchTable, setFetchTable] = useState<any[]>([]);
     const [columnNames, setColumnNames] = useState<string[]>([]); // Adjusted line
+
+    useEffect(() => {
+        setS3url(`http://127.0.0.1:8000/s3_item?bucket=${bucket}&folder=${folder}&name=${item_name}`);
+    }, [bucket, folder, item_name]); // Dependencies
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (s3url) {
@@ -25,19 +34,41 @@ export default function Uploadfile() {
             }
             const arrayBuffer = await res.arrayBuffer();
             const response_table = tableFromIPC(arrayBuffer); // Assumes tableFromIPC can handle ArrayBuffer directly
-            console.table([...response_table]);
+            //console.table(response_table.toArray());
+            const arrayTable = response_table.toArray();
+            console.table(arrayTable);
             const columns = response_table.schema.fields.map((field) => field.name);
-            console.log(columns);
+            //console.log(columns);
+
             setColumnNames(columns);
-            setTable(response_table);
+            setFetchTable(arrayTable);
+
+            // await getTableData(arrayTable);
         } catch (error) {
             console.error('Error:', error);
         }
     }
 
+
+
+    // async function getTableData(tableData: any) {
+    //     tableData.map((row, rowIndex) => {
+    //      //console.log(`${rowIndex}: ${row}`);
+    //         console.log("yep")
+    //    })
+    // }
+
+    // const renderRowData = (rowProxy) => {
+    //     // Make sure `rowProxy` is the structure you expect.
+    //     // This example assumes `rowProxy` is an object with column names as keys.
+    //     return columnNames.map((columnName, index) => (
+    //         <TableCell key={index}>{rowProxy[columnName]}</TableCell>
+    //     ));
+    // };
+
     return (
         <main>
-            <div className="flex flex-col items-center justify-center h-screen px-4 m-2">
+            <div className="flex flex-col items-center justify-center px-4 m-2">
                 <Card className="sm:w-[800px] w-full">
                     <CardHeader className="flex gap-3 my-2">
                         <div className="flex flex-col">
@@ -47,40 +78,64 @@ export default function Uploadfile() {
                     <Divider/>
                     <CardBody className="overflow-y-clip my-5">
                         <form onSubmit={handleSubmit}>
-                            <p className="mb-6">
+                            <div className="mb-6 flex flex-row">
+                                <label className="text-md pr-2">S3 Bucket:</label>
+                                <input type="input"
+                                       name="bucket"
+                                       value={bucket}
+                                       onChange={e => setBucket(e.target.value)}
+                                       className="w-5/6 p-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div className="mb-6 flex flex-row">
+                                <label className="text-md pr-2">Folder Path:</label>
+                                <input type="input"
+                                       name="folder"
+                                       value={folder}
+                                       onChange={e => setFolder(e.target.value)}
+                                       className="w-5/6 p-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div className="mb-6 flex flex-row">
+                                <label className="text-md pr-2">Object:</label>
+                                <input type="input"
+                                       name="item_name"
+                                       value={item_name}
+                                       onChange={e => setItem_name(e.target.value)}
+                                       className="w-5/6 p-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div className="mb-6 flex flex-row">
+                                <label className="text-md pr-2">API Query:</label>
                                 <input type="input"
                                        name="s3url"
                                        value={s3url}
                                        onChange={e => setS3url(e.target.value)}
+                                       className="w-5/6 p-2 border border-gray-300 rounded-md"
                                 />
-                            </p>
-                            <Button className="w-1/3 mt-5 text-amber-50 hover:bg-sky-600" color="success" type="submit">GetData</Button>
+                            </div>
+                            <Button className="w-1/3 mt-5 text-amber-50 hover:bg-sky-600" color="success"
+                                    type="submit">GetData</Button>
                         </form>
                     </CardBody>
-                    <div>
-                        <CardBody>
-                            <div>
-                                {table}
-                            </div>
-                            {/*<Table aria-label="Example table with dynamic content">*/}
-                            {/*    <TableHeader>*/}
-                            {/*        {table.map((column) =>*/}
-                            {/*            <TableColumn key={column.key}>{column.label}</TableColumn>*/}
-                            {/*        )}*/}
-                            {/*    </TableHeader>*/}
-                            {/*    <TableBody>*/}
-                            {/*        {rows.map((row) =>*/}
-                            {/*            <TableRow key={row.key}>*/}
-                            {/*                {(columnKey) => <TableCell>{getKeyValue(row, columnKey)}</TableCell>}*/}
-                            {/*            </TableRow>*/}
-                            {/*        )}*/}
-                            {/*    </TableBody>*/}
-                            {/*</Table>*/}
-                        </CardBody>
-                    </div>
                     <Divider/>
                     <CardFooter>
-                        <br />
+                        <br/>
+                    </CardFooter>
+                </Card>
+            </div>
+            <div className="flex flex-col items-center px-4 m-2 mt-5">
+                <Card className="sm:w-[800px] w-full">
+                    <CardHeader>
+                        <p className="text-md">Data Table</p>
+                    </CardHeader>
+                    <Divider/>
+                    <CardBody className="overflow-y-clip my-5">
+                        {columnNames.join(', ')}
+                    </CardBody>
+                    <Divider/>
+                    <CardFooter>
+                        <br/>
                     </CardFooter>
                 </Card>
             </div>
