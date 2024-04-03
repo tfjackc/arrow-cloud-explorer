@@ -1,12 +1,13 @@
 'use client';
-import {Button, Card, CardBody, CardFooter, CardHeader, Divider, Image, Input} from "@nextui-org/react";
+import {Button, Card, CardBody, CardFooter, CardHeader, Divider, Image, Input, } from "@nextui-org/react";
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue} from "@nextui-org/react";
 import React, { useState } from "react";
 import { tableFromIPC } from 'apache-arrow';
 export default function Uploadfile() {
 
     const [s3url, setS3url] = useState("http://127.0.0.1:8000/s3_item");
-
-
+    const [table, setTable] = useState(tableFromIPC([])); // Adjusted line
+    const [columnNames, setColumnNames] = useState<string[]>([]); // Adjusted line
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (s3url) {
@@ -20,11 +21,15 @@ export default function Uploadfile() {
             console.log("Fetching data");
             const res = await fetch(s3url);
             if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
+                console.log("HTTP error!");
             }
             const arrayBuffer = await res.arrayBuffer();
-            const table = tableFromIPC(arrayBuffer); // Assumes tableFromIPC can handle ArrayBuffer directly
-            console.table([...table]);
+            const response_table = tableFromIPC(arrayBuffer); // Assumes tableFromIPC can handle ArrayBuffer directly
+            console.table([...response_table]);
+            const columns = response_table.schema.fields.map((field) => field.name);
+            console.log(columns);
+            setColumnNames(columns);
+            setTable(response_table);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -51,8 +56,28 @@ export default function Uploadfile() {
                             </p>
                             <Button className="w-1/3 mt-5 text-amber-50 hover:bg-sky-600" color="success" type="submit">GetData</Button>
                         </form>
-
                     </CardBody>
+                    <div>
+                        <CardBody>
+                            <div>
+                                {table}
+                            </div>
+                            {/*<Table aria-label="Example table with dynamic content">*/}
+                            {/*    <TableHeader>*/}
+                            {/*        {table.map((column) =>*/}
+                            {/*            <TableColumn key={column.key}>{column.label}</TableColumn>*/}
+                            {/*        )}*/}
+                            {/*    </TableHeader>*/}
+                            {/*    <TableBody>*/}
+                            {/*        {rows.map((row) =>*/}
+                            {/*            <TableRow key={row.key}>*/}
+                            {/*                {(columnKey) => <TableCell>{getKeyValue(row, columnKey)}</TableCell>}*/}
+                            {/*            </TableRow>*/}
+                            {/*        )}*/}
+                            {/*    </TableBody>*/}
+                            {/*</Table>*/}
+                        </CardBody>
+                    </div>
                     <Divider/>
                     <CardFooter>
                         <br />
