@@ -1,7 +1,9 @@
 'use client';
 import {Button, Card, CardBody, CardFooter, CardHeader, Divider} from "@nextui-org/react";
 import React, {useEffect, useState} from "react";
-import {tableFromIPC} from "apache-arrow";
+import {tableFromIPC, Table} from "apache-arrow";
+import ArrowTableToHtml from "@/app/ui/arrow_table";
+import DataOptions from "@/app/ui/data_options";
 
 export default function QueryS3Card() {
 
@@ -9,7 +11,7 @@ export default function QueryS3Card() {
     const [folder, setFolder] = useState("month-parquet/MONTH=2020-01/");
     const [item_name, setItem_name] = useState("d4723648cfdb4e65b0537890d6e0396e-0.parquet");
     const [s3url, setS3url] = useState(`http://127.0.0.1:8000/s3_item?bucket=${bucket}&folder=${folder}&name=${item_name}`);
-    const [fetchTable, setFetchTable] = useState<any[]>([]);
+    const [fetchTable, setFetchTable] = useState<Table | null>(null);
     const [columnNames, setColumnNames] = useState<string[]>([]); // Adjusted line
 
     useEffect(() => {
@@ -25,30 +27,30 @@ export default function QueryS3Card() {
     }
 
     async function getData(s3url: string) {
-
         try {
             console.log("Fetching data");
             const res = await fetch(s3url);
             if (!res.ok) {
                 console.log("HTTP error!");
+                return;
             }
-            console.log(res)
             const arrayBuffer = await res.arrayBuffer();
-            const response_table = tableFromIPC(arrayBuffer); // Assumes tableFromIPC can handle ArrayBuffer directly
-            //console.table(response_table.schema.fields);
+            const response_table = tableFromIPC(arrayBuffer);
             const columns = response_table.schema.fields.map((field) => field.name);
             setColumnNames(columns);
-            // const arrayTable = response_table.toArray();
-            // console.table(arrayTable);
-            // const columns = response_table.schema.fields.map((field) => field.name);
-            // console.log(columns);
-
-           // setFetchTable(arrayTable);
-            //await getTableData(arrayTable);
+            console.log
+           // setFetchTable(response_table);
+            // No need to log here; useEffect will handle it.
         } catch (error) {
             console.error('Error:', error);
         }
     }
+
+    useEffect(() => {
+        console.log("Updated column names:", columnNames);
+        console.log(typeof(columnNames))
+        console.log("Updated table:", fetchTable);
+    }, [columnNames, fetchTable]);  //
 
     return (
         <main>
@@ -103,7 +105,10 @@ export default function QueryS3Card() {
                 </CardBody>
                 <Divider/>
                 <CardFooter>
-                    <br/>
+                    {/*{fetchTable && <ArrowTableToHtml arrowTable={fetchTable} />}*/}
+                    <div>
+                        <DataOptions columnNames={columnNames}/>
+                    </div>
                 </CardFooter>
             </Card>
         </main>

@@ -8,7 +8,6 @@ export default function Uploadfile() {
                <QueryS3Card />
             </div>
             <div className="flex flex-col items-center px-4 m-2 mt-5">
-               <DataOptions />
             </div>
         </main>
     );

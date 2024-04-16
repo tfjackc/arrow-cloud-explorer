@@ -1,21 +1,10 @@
 import {Card, CardBody, CardFooter, CardHeader, Divider} from "@nextui-org/react";
-export default function DataOptions() {
+export default function DataOptions({columnNames}: {columnNames: string[]}) {
     return (
         <main>
-            <Card className="sm:w-[800px] w-full">
-                <CardHeader>
-                    <p className="text-md"></p>
-                </CardHeader>
-                <Divider/>
-                <CardBody className="overflow-y-clip my-5">
-                    {/*{columnNames.join(', ')}*/}
-                    Data Results
-                </CardBody>
-                <Divider/>
-                <CardFooter>
-                    <br/>
-                </CardFooter>
-            </Card>
+            <div className="overflow-y-clip my-5">
+                {columnNames.join(", ")}
+            </div>
         </main>
     );
 }
