@@ -1,9 +1,7 @@
 'use server';
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { tableFromIPC } from 'apache-arrow';
-
 import { Readable } from 'stream';
-import * as parquet from "parquet-wasm";
 import {readGeoParquet} from "@geoarrow/geoparquet-wasm";
 
 

@@ -4,15 +4,16 @@ import React, {useEffect, useState} from "react";
 import {tableFromIPC} from "apache-arrow";
 
 export default function QueryS3Card() {
+
     const [bucket, setBucket] = useState("gva-data-bucket");
-    const [folder, setFolder] = useState("month-parquet%2FMONTH%3D2020-12");
+    const [folder, setFolder] = useState("month-parquet/MONTH=2020-01/");
     const [item_name, setItem_name] = useState("d4723648cfdb4e65b0537890d6e0396e-0.parquet");
     const [s3url, setS3url] = useState(`http://127.0.0.1:8000/s3_item?bucket=${bucket}&folder=${folder}&name=${item_name}`);
     const [fetchTable, setFetchTable] = useState<any[]>([]);
     const [columnNames, setColumnNames] = useState<string[]>([]); // Adjusted line
 
     useEffect(() => {
-        setS3url(`http://127.0.0.1:8000/s3_item?bucket=${bucket}&folder=${folder}&name=${item_name}`);
+        setS3url(`http://127.0.0.1:8000/in_memory_return?bucket=${bucket}&folder=${folder}&name=${item_name}`);
     }, [bucket, folder, item_name]); // Dependencies
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,22 +25,26 @@ export default function QueryS3Card() {
     }
 
     async function getData(s3url: string) {
+
         try {
             console.log("Fetching data");
             const res = await fetch(s3url);
             if (!res.ok) {
                 console.log("HTTP error!");
             }
+            console.log(res)
             const arrayBuffer = await res.arrayBuffer();
             const response_table = tableFromIPC(arrayBuffer); // Assumes tableFromIPC can handle ArrayBuffer directly
-            //console.table(response_table.toArray());
-            const arrayTable = response_table.toArray();
-            console.table(arrayTable);
+            //console.table(response_table.schema.fields);
             const columns = response_table.schema.fields.map((field) => field.name);
-            //console.log(columns);
             setColumnNames(columns);
-            setFetchTable(arrayTable);
-            // await getTableData(arrayTable);
+            // const arrayTable = response_table.toArray();
+            // console.table(arrayTable);
+            // const columns = response_table.schema.fields.map((field) => field.name);
+            // console.log(columns);
+
+           // setFetchTable(arrayTable);
+            //await getTableData(arrayTable);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -50,7 +55,7 @@ export default function QueryS3Card() {
             <Card className="sm:w-[800px] w-full">
                 <CardHeader className="flex gap-3 my-2">
                     <div className="flex flex-col">
-                        <p className="text-md">Upload Data</p>
+                        {/*<p className="text-md">S3 Object Access</p>*/}
                     </div>
                 </CardHeader>
                 <Divider/>
