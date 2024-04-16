@@ -13,6 +13,7 @@ export default function QueryS3Card() {
     const [s3url, setS3url] = useState(`http://127.0.0.1:8000/s3_item?bucket=${bucket}&folder=${folder}&name=${item_name}`);
     const [fetchTable, setFetchTable] = useState<Table | null>(null);
     const [columnNames, setColumnNames] = useState<string[]>([]); // Adjusted line
+    const [rowCount, setRowCount] = useState<number>(0);
 
     useEffect(() => {
         setS3url(`http://127.0.0.1:8000/in_memory_return?bucket=${bucket}&folder=${folder}&name=${item_name}`);
@@ -36,9 +37,11 @@ export default function QueryS3Card() {
             }
             const arrayBuffer = await res.arrayBuffer();
             const response_table = tableFromIPC(arrayBuffer);
+
             const columns = response_table.schema.fields.map((field) => field.name);
             setColumnNames(columns);
-            console.log
+            console.log(response_table.schema);  // View the schema of the table
+            setRowCount(response_table.numRows);
            // setFetchTable(response_table);
             // No need to log here; useEffect will handle it.
         } catch (error) {
@@ -47,8 +50,8 @@ export default function QueryS3Card() {
     }
 
     useEffect(() => {
+        console.log("Updated row count:", rowCount);
         console.log("Updated column names:", columnNames);
-        console.log(typeof(columnNames))
         console.log("Updated table:", fetchTable);
     }, [columnNames, fetchTable]);  //
 
@@ -107,7 +110,7 @@ export default function QueryS3Card() {
                 <CardFooter>
                     {/*{fetchTable && <ArrowTableToHtml arrowTable={fetchTable} />}*/}
                     <div>
-                        <DataOptions columnNames={columnNames}/>
+                        <DataOptions columnNames={columnNames} rowCount={rowCount}/>
                     </div>
                 </CardFooter>
             </Card>
